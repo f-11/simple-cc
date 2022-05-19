@@ -1,0 +1,4 @@
+simple-cc
+tmp*
+*.o
+a.out
