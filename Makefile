@@ -1,3 +1,5 @@
+CFLAGS=-std=c11 -g -static
+
 simple-cc: simple-cc.c
 
 test: simple-cc
