@@ -1,6 +1,14 @@
 CFLAGS=-std=c11 -g -static
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
 
-simple-cc: simple-cc.c
+simple-cc: $(OBJS)
+	$(CC) -o simple-cc $(OBJS) $(LDFLAGS)
+
+$(OBJS): simple-cc.h
+
+run:
+	./simple-cc
 
 test: simple-cc
 	./test.sh
@@ -8,4 +16,4 @@ test: simple-cc
 clean:
 	rm -f simple-cc *.o 
 
-.PHONY: test clean
+.PHONY: test clean run

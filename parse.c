@@ -1,28 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
+#include "simple-cc.h"
 
-typedef enum {
-  TK_RESERVED,
-  TK_NUM,
-  TK_EOF,
-} TokenKind;
-
-typedef struct Token Token;
-
-struct Token {
-  TokenKind kind;
-  Token *next;
-  int val;
-  char *str;
-};
-
-Token *token;
-
-char *user_input; //入力されたプログラム
 
 void error(char *fmt, ...) {
   va_list ap;
@@ -94,7 +71,7 @@ Token *tokenize (char *p) {
       p++;
       continue;
     }
-    if (*p == '+' || *p == '-') {
+    if (strchr("+-*/()", *p)) {
       cur = new_token(TK_RESERVED, cur, p++);
       continue;
     }
@@ -109,30 +86,4 @@ Token *tokenize (char *p) {
 
   new_token(TK_EOF, cur, p);
   return head.next;
-}
-
-int main (int argc, char **argv) {
-  if (argc < 2) {
-    fprintf(stderr, "引数の個数が不正です。\n");
-    return 1;
-  }
-
-  token = tokenize(argv[1]);
-
-  printf("LI 0,%d\n", expect_number());
-
-  while (!at_eof()) {
-    if (consume('+')) {
-      printf("LI 1,%d\n", expect_number());
-      printf("ADD 0 1\n");
-      continue;
-    }
-
-    expect('-');
-    printf("LI 1,%d\n", expect_number());
-    printf("SUB 0,1\n");
-  }
-  printf("HLT\n");
-
-  return 0;
 }
