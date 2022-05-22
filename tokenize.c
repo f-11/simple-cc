@@ -11,13 +11,13 @@ bool consume(const char *op) {
   return true;
 }
 
-// 次のトークンがローカル変数ならその変数のベースポインタからのオフセットを返す
-int consume_ident_and_return_offset() {
+// 次のトークンがローカル変数
+Token *consume_ident() {
   if (token->kind != TK_IDENT)
-    return 0;
-  int ofs = token->str[0] - 'a' + 1;
+    return NULL;
+  Token *tok = token;
   token = token->next;
-  return ofs;
+  return tok;
 }
 
 // 次のトークンが期待する記号(op)のときはトークンを一つ進める
@@ -55,15 +55,23 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
 
 Token *tokenize () {
   char *p = user_input;
+
   Token head;
   head.next = NULL;
   Token *cur = &head;
+  
+  // init variables
+  LVar dummy;
+  dummy.offset = 0;
+  locals = &dummy;
+
 
   while (*p) {
     if (isspace(*p)) {
       p++;
       continue;
     }
+
     if (matchstr("==", p) || matchstr("!=", p) ||
         matchstr("<=", p) || matchstr(">=", p) ) {
       cur = new_token(TK_RESERVED, cur, p, 2);
@@ -74,15 +82,21 @@ Token *tokenize () {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
-    if ('a' <= *p && *p <= 'z') {
-      cur = new_token(TK_IDENT, cur, p++, 1);
-      continue;
-    }
+
     if (isdigit(*p)) {
       cur = new_token(TK_NUM, cur, p, 0);
       char *q = p;
       cur->val = strtol(p, &p, 10);
       cur->len = p - q;
+      continue;
+    }
+
+    char *q;
+    for (q = p; isalnum(*q) || *q == '_'; q++)
+      ;
+    if (q > p) {
+      cur = new_token(TK_IDENT, cur, p, q - p);
+      p = q;
       continue;
     }
 

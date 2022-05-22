@@ -1,7 +1,11 @@
 #include "simple-cc.h"
 
-
-// parser
+LVar *find_lvar(Token *tok) {
+  for (LVar *var = locals; var; var = var->next)
+    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+      return var;
+  return NULL;
+}
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
@@ -18,10 +22,22 @@ Node *new_node_num(int val) {
   return node;
 }
 
-Node *new_node_ident(int offset) {
+Node *new_node_ident(Token *tok) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
-  node->offset = offset;
+  
+  LVar *lvar = find_lvar(tok);
+  if (lvar) {
+    node->offset = lvar->offset;
+  } else {
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals;
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    lvar->offset = locals->offset + 1;
+    node->offset = lvar->offset;
+    locals = lvar;
+  }
   return node;
 }
 
@@ -136,9 +152,9 @@ Node *unary() {
 }
 
 Node *primary() {
-  int ofs = consume_ident_and_return_offset();
-  if (ofs)
-    return new_node_ident(ofs);
+  Token *tok = consume_ident();
+  if (tok) 
+    return new_node_ident(tok);
 
   if (consume("(")) {
     Node *node = expr();

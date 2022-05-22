@@ -52,7 +52,7 @@ struct Node {
 };
 
 // local variables
-struct LVat {
+struct LVar {
   LVar *next;
   char *name;
   int len;
@@ -119,7 +119,7 @@ bool matchstr(const char *p1, char *p2);
 
 //tokenize.c
 bool consume(const char *op);
-int consume_ident_and_return_offset();
+Token *consume_ident();
 void expect(const char *op);
 int expect_number();
 bool at_eof();
