@@ -33,6 +33,15 @@ bool consume(const char *op) {
   return true;
 }
 
+// 次のトークンがローカル変数ならその変数のベースポインタからのオフセットを返す
+int consume_ident_and_return_offset() {
+  if (token->kind != TK_IDENT)
+    return 0;
+  int ofs = token->str[0] - 'a' + 1;
+  token = token->next;
+  return ofs;
+}
+
 // 次のトークンが期待する記号(op)のときはトークンを一つ進める
 // 偽ならエラー
 void expect(const char *op) {
@@ -70,7 +79,8 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   return tok;
 }
 
-Token *tokenize (char *p) {
+Token *tokenize () {
+  char *p = user_input;
   Token head;
   head.next = NULL;
   Token *cur = &head;
@@ -86,8 +96,12 @@ Token *tokenize (char *p) {
       p += 2;
       continue;
     }
-    if (strchr("+-*/()><", *p)) {
+    if (strchr("+-*/()><=;", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
+      continue;
+    }
+    if ('a' <= *p && *p <= 'z') {
+      cur = new_token(TK_IDENT, cur, p++, 1);
       continue;
     }
     if (isdigit(*p)) {
@@ -122,14 +136,27 @@ Node *new_node_num(int val) {
   return node;
 }
 
-// expr = equality
+Node *new_node_ident(int offset) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+  node->offset = offset;
+  return node;
+}
+
+// program = stmt*
+// stmt = expr ";"
+// expr = assign
+// assign = equality ("=" assign)?
 // equality = relational ("==" relational | "!=" relational)*
 // relational = add ("<=" add | "<" add | ">=" add | ">" add)*
 // add = mul ("+" mul | "-" mul)*
 // mul = unary ("*" unary | "/" unary)*
 // unary = ("+" | "-")? primay
-// primary = num | "(" expr ")"
+// primary = num | ident | "(" expr ")"
 
+Node *stmt();
+Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -137,9 +164,29 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-Node *expr() {
-  Node *node = equality();
+void program() {
+  int i = 0;
+  while (!at_eof())
+    code[i++] = stmt();
+  code[i] = NULL;
+}
+
+Node *stmt() {
+  Node *node = expr();
+  expect(";");
   return node;
+}
+
+Node *expr() {
+  return assign();
+}
+
+Node *assign() {
+  Node *node = equality();
+  if (consume("="))
+    return new_node(ND_ASSIGN, node, assign());
+  else
+    return node;
 }
 
 Node *equality() {
@@ -207,11 +254,15 @@ Node *unary() {
 }
 
 Node *primary() {
+  int ofs = consume_ident_and_return_offset();
+  if (ofs)
+    return new_node_ident(ofs);
+
   if (consume("(")) {
     Node *node = expr();
     expect(")");
     return node;
-  }
+  } 
 
   return new_node_num(expect_number());
 }

@@ -12,6 +12,7 @@ typedef struct Node Node;
 // Token
 typedef enum {
   TK_RESERVED,
+  TK_IDENT,
   TK_NUM,
   TK_EOF,
 } TokenKind;
@@ -34,6 +35,8 @@ typedef enum {
   ND_NEQL,// !=
   ND_LT,  // <
   ND_LTE, // <=
+  ND_ASSIGN, // =
+  ND_LVAR,   // local variables
   ND_NUM,
 } NodeKind;
 
@@ -42,11 +45,13 @@ struct Node {
   Node *lhs;  //左辺
   Node *rhs;  //右辺
   int val;  //ND_NUMのとき
+  int offset;   //ND_LVARのとき変数の位置を示す
 };
 
 //==declare==
 extern Token *token;
 extern char *user_input; //入力されたプログラム
+extern Node *code[100];
 
 //==functions==
 
@@ -59,11 +64,11 @@ int expect_number();
 bool at_eof();
 
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
-Token *tokenize (char *p);
+Token *tokenize ();
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-Node *expr();
+void program();
 
 //codegen.c
 void gen(Node *node);
