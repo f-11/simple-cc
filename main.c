@@ -4,7 +4,40 @@
 Token *token;
 char *user_input; //入力されたプログラム
 Node *code[100];
+LVar *locals;
+Inst *inst;
+Label *label;
 
+//============
+// utility function
+//============
+
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+void error_at(char *loc, char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+
+  int pos = loc - user_input;
+  fprintf(stderr, "%s\n", user_input);
+  fprintf(stderr, "%*s", pos, " "); //位置揃え
+  fprintf(stderr, "^ ");
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+bool matchstr(const char *p1, char *p2) {
+  return strncmp(p1, p2, strlen(p1)) == 0;
+}
+
+//============
 
 int main (int argc, char **argv) {
   if (argc < 2) {
@@ -12,11 +45,13 @@ int main (int argc, char **argv) {
     return 1;
   }
 
-  //parse
   user_input = argv[1];
+  //tokenize
   token = tokenize();
+  //parse
   program();
 
+  //initial code
   printf("LI 6,1\n");
   printf("SLL 6,12\n"); // rsp = 4096
   printf("PUSH 5\n");
@@ -29,6 +64,7 @@ int main (int argc, char **argv) {
     printf("POP 0\n");
   }
 
+  //final code
   printf("MOV 6,5\n");
   printf("POP 0\n");
   printf("HLT\n");
