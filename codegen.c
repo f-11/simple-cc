@@ -34,6 +34,23 @@ void gen(Node *node) {
     printf("POP 0\n");
     printf("BR\n");
     return;
+  case ND_IF:       
+    gen(node->lhs);           //条件評価 A
+    printf("POP 0\n");
+    printf("CMPI 0,1\n");
+    if (node->rhs) {          // "if" "(" A ")" B "else" C 
+      printf("BE -> else\n");
+      gen(node->stmt1);        // B
+      printf("B -> end\n");
+      printf("-> else\n");
+      gen(node->stmt2);       // C
+      printf("-> end\n");
+    } else {                  // "if" "(" A ")" B
+      printf("BE -> end\n");
+      gen(node->stmt1);       // B
+      printf("-> end\n");
+    }
+    return;
   default:
     ;
   }
@@ -57,17 +74,33 @@ void gen(Node *node) {
     case ND_DIV:
       printf("DIV 0,1\n");
       break;
-    case ND_EQL:
+    case ND_EQL: // 条件が真なら0,偽なら1がスタックに
       printf("CMP 0,1\n");
+      printf("BE 2\n");
+      printf("LI 0,1\n");
+      printf("B 1\n");
+      printf("LI 0,0\n");
       break;
     case ND_NEQL:
       printf("CMP 0,1\n");
+      printf("BNE 2\n");
+      printf("LI 0,1\n");
+      printf("B 1\n");
+      printf("LI 0,0\n");
       break;
     case ND_LT:
       printf("CMP 0,1\n");
+      printf("BLT 2\n");
+      printf("LI 0,1\n");
+      printf("B 1\n");
+      printf("LI 0,0\n");
       break;
     case ND_LTE:
       printf("CMP 0,1\n");
+      printf("BLE 2\n");
+      printf("LI 0,1\n");
+      printf("B 1\n");
+      printf("LI 0,0\n");
       break;
     default:
       ;

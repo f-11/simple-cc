@@ -84,6 +84,26 @@ Token *tokenize () {
       p+=6;
       continue;
     }
+    if (matchstr_plus("if", p)) {
+      cur = new_token(TK_IF, cur, p, 2);
+      p+=2;
+      continue;
+    }
+    if (matchstr_plus("else", p)) {
+      cur = new_token(TK_ELSE, cur, p, 4);
+      p+=4;
+      continue;
+    }
+    if (matchstr_plus("while", p)) {
+      cur = new_token(TK_WHILE, cur, p, 5);
+      p+=5;
+      continue;
+    }
+    if (matchstr_plus("for", p)) {
+      cur = new_token(TK_FOR, cur, p, 3);
+      p+=3;
+      continue;
+    }
 
     if (matchstr("==", p) || matchstr("!=", p) ||
         matchstr("<=", p) || matchstr(">=", p) ) {

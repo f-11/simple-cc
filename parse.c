@@ -1,5 +1,7 @@
 #include "simple-cc.h"
 
+Node dummy_node;
+
 LVar *find_lvar(Token *tok) {
   for (LVar *var = locals; var; var = var->next)
     if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
@@ -42,7 +44,11 @@ Node *new_node_ident(Token *tok) {
 }
 
 // program = stmt*
-// stmt = expr ";" | "return" expr ";"
+// stmt = expr ";" 
+//      | "return" expr ";"
+//      | "if" "(" expr ")" stmt ("else" stmt)?
+//      | "while" "(" expr ")" stmt
+//      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 // expr = assign
 // assign = equality ("=" assign)?
 // equality = relational ("==" relational | "!=" relational)*
@@ -72,14 +78,24 @@ void program() {
 Node *stmt() {
   Node *node;
 
-  if (consume_token(TK_RETURN)) {
+  if (consume_token(TK_RETURN)) {   // return (expr)?;
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->lhs = expr();
-  } else {
+    expect(";");
+  } else  if (consume_token(TK_IF)){ //if, if-else
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_IF;
+    node->lhs = expr();
+    node->stmt1 = stmt();
+    if (consume_ident(TK_ELSE)) {
+      node->rhs = &dummy_node;
+      node->stmt2 = stmt();
+    }
+  } else {                          // expr;
     node = expr();
+    expect(";");
   }
-  expect(";");
   return node;
 }
 

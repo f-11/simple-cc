@@ -16,6 +16,10 @@ typedef struct Label Label;
 typedef enum {
   TK_RESERVED,
   TK_RETURN,
+  TK_IF,
+  TK_ELSE,
+  TK_WHILE,
+  TK_FOR,
   TK_IDENT,
   TK_NUM,
   TK_EOF,
@@ -42,6 +46,7 @@ typedef enum {
   ND_ASSIGN, // =
   ND_LVAR,   // local variables
   ND_RETURN,
+  ND_IF,
   ND_NUM,
 } NodeKind;
 
@@ -49,6 +54,8 @@ struct Node {
   NodeKind kind;
   Node *lhs;  //左辺
   Node *rhs;  //右辺
+  Node *stmt1;  // 制御構文用
+  Node *stmt2;  //    (forのときはかなりad-hocな使い方をする) 
   int val;  //ND_NUMのとき
   int offset;   //ND_LVARのとき変数の位置を示す
 };
@@ -143,4 +150,7 @@ void gen(Node *node);
 //inst.c
 void add_inst(InstKind kind, int r0, int r1, int r2);
 void add_call(char *name);
+void add_jump(char *name);
 void add_label(char *name);
+void add_pop(int n);
+void add_push(int n);
