@@ -15,6 +15,7 @@ typedef struct Label Label;
 // Token
 typedef enum {
   TK_RESERVED,
+  TK_RETURN,
   TK_IDENT,
   TK_NUM,
   TK_EOF,
@@ -40,6 +41,7 @@ typedef enum {
   ND_LTE, // <=
   ND_ASSIGN, // =
   ND_LVAR,   // local variables
+  ND_RETURN,
   ND_NUM,
 } NodeKind;
 
@@ -116,9 +118,12 @@ extern Label *label;
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool matchstr(const char *p1, char *p2);
+bool matchstr_plus(const char *p1, char *p2);
+bool isalnumu(char c);
 
 //tokenize.c
 bool consume(const char *op);
+bool consume_token(TokenKind kind);
 Token *consume_ident();
 void expect(const char *op);
 int expect_number();

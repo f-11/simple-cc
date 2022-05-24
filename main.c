@@ -37,6 +37,15 @@ bool matchstr(const char *p1, char *p2) {
   return strncmp(p1, p2, strlen(p1)) == 0;
 }
 
+bool matchstr_plus(const char *p1, char *p2) {
+  int len = strlen(p1);
+  return strncmp(p1, p2, len) == 0 && !isalnumu(p2[len]);
+}
+
+bool isalnumu(char c) {
+  return isalnum(c) || c == '_';
+}
+
 //============
 
 int main (int argc, char **argv) {
@@ -56,7 +65,6 @@ int main (int argc, char **argv) {
   printf("SLL 6,12\n"); // rsp = 4096
   printf("PUSH 5\n");
   printf("MOV 5,6\n");
-  printf("SUBI 6,26\n");
 
   // generate code
   for (int i = 0; code[i] != NULL; i++) {

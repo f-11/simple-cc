@@ -11,6 +11,13 @@ bool consume(const char *op) {
   return true;
 }
 
+bool consume_token(TokenKind kind) {
+  if (token->kind != kind)
+    return false;
+  token = token->next;
+  return true;
+}
+
 // 次のトークンがローカル変数
 Token *consume_ident() {
   if (token->kind != TK_IDENT)
@@ -26,7 +33,7 @@ void expect(const char *op) {
   if (token->kind != TK_RESERVED ||
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len))
-    error("Expecting %s, but not.", op);
+    error("Expecting '%s', but not.", op);
   token = token->next;
 }
 
@@ -72,6 +79,12 @@ Token *tokenize () {
       continue;
     }
 
+    if (matchstr_plus("return", p)) {
+      cur = new_token(TK_RETURN, cur, p, 6);
+      p+=6;
+      continue;
+    }
+
     if (matchstr("==", p) || matchstr("!=", p) ||
         matchstr("<=", p) || matchstr(">=", p) ) {
       cur = new_token(TK_RESERVED, cur, p, 2);
@@ -92,7 +105,7 @@ Token *tokenize () {
     }
 
     char *q;
-    for (q = p; isalnum(*q) || *q == '_'; q++)
+    for (q = p; isalnumu(*q); q++)
       ;
     if (q > p) {
       cur = new_token(TK_IDENT, cur, p, q - p);

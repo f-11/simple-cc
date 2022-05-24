@@ -29,6 +29,11 @@ void gen(Node *node) {
     printf("ST 1,0,0\n");
     printf("PUSH 1\n");
     return;
+  case ND_RETURN:
+    gen(node->lhs);
+    printf("POP 0\n");
+    printf("BR\n");
+    return;
   default:
     ;
   }

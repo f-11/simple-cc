@@ -42,7 +42,7 @@ Node *new_node_ident(Token *tok) {
 }
 
 // program = stmt*
-// stmt = expr ";"
+// stmt = expr ";" | "return" expr ";"
 // expr = assign
 // assign = equality ("=" assign)?
 // equality = relational ("==" relational | "!=" relational)*
@@ -70,7 +70,15 @@ void program() {
 }
 
 Node *stmt() {
-  Node *node = expr();
+  Node *node;
+
+  if (consume_token(TK_RETURN)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_RETURN;
+    node->lhs = expr();
+  } else {
+    node = expr();
+  }
   expect(";");
   return node;
 }
