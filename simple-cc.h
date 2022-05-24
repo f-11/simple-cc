@@ -85,6 +85,7 @@ typedef enum {
   OUT,
   HLT,
   LD,
+  ST,
   LI,
   ADDI,
   CMPI,
@@ -99,15 +100,17 @@ typedef enum {
 
 struct Inst {
   InstKind kind;
-  int r0, r1, r2;
+  int r0;     // Rd, Rs (OUT), Ra (LD,ST), Rb (LI), B* (d)
+  int r1;     // Rs, d (shift*,LD,ST,ADDI,CMPI)
+  int r2;     // Rb (LD,ST)
   int linenum; // アセンブリにおける行番号
+  char *name; // ジャンプ系の命令でラベルの名前
   Inst *next;
 };
 
 struct Label {
   char *name;
-  int len;
-  Inst *inst;
+  Inst *inst; // アセンブリでジャンプ先の一行前の命令
   Label *next;
 };
 
@@ -127,6 +130,8 @@ void error_at(char *loc, char *fmt, ...);
 bool matchstr(const char *p1, char *p2);
 bool matchstr_plus(const char *p1, char *p2);
 bool isalnumu(char c);
+int get_unique_num();
+char *get_unique_str(const char *startwith);
 
 //tokenize.c
 bool consume(const char *op);
@@ -148,9 +153,11 @@ void program();
 void gen(Node *node);
 
 //inst.c
-void add_inst(InstKind kind, int r0, int r1, int r2);
+void add_inst(InstKind kind, ...);
 void add_call(char *name);
-void add_jump(char *name);
+void add_jump(InstKind kind, char *name);
 void add_label(char *name);
 void add_pop(int n);
 void add_push(int n);
+void link(Inst *head, Label *lhead);
+void print_inst(Inst *head);

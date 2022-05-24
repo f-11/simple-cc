@@ -46,6 +46,20 @@ bool isalnumu(char c) {
   return isalnum(c) || c == '_';
 }
 
+int q;
+int get_unique_num() {
+  q++;
+  return q;
+}
+
+char *get_unique_str(const char *startwith) {
+  int len = strlen(startwith);
+  char *ptr = calloc(len + 5, sizeof(char));  //MEMO: unique number が４桁になったら終わる
+  strcpy(ptr, startwith);
+  sprintf(ptr+len, ".%d", get_unique_num());
+  return ptr;
+}
+
 //============
 
 int main (int argc, char **argv) {
@@ -53,6 +67,11 @@ int main (int argc, char **argv) {
     fprintf(stderr, "引数の個数が不正です。\n");
     return 1;
   }
+  
+  Inst dummy_inst;
+  Label dummy_label;
+  inst = &dummy_inst;
+  label = &dummy_label;
 
   user_input = argv[1];
   //tokenize
@@ -61,21 +80,26 @@ int main (int argc, char **argv) {
   program();
 
   //initial code
-  printf("LI 6,1\n");
-  printf("SLL 6,12\n"); // rsp = 4096
-  printf("PUSH 5\n");
-  printf("MOV 5,6\n");
+  add_inst(LI, 6, 1);
+  add_inst(SLL, 6, 12); // rsp = 4096
+  add_push(5);
+  add_inst(MOV, 5, 6);
 
   // generate code
   for (int i = 0; code[i] != NULL; i++) {
     gen(code[i]);
-    printf("POP 0\n");
+    add_pop(0);
   }
 
   //final code
-  printf("MOV 6,5\n");
-  printf("POP 0\n");
-  printf("HLT\n");
+  add_inst(MOV, 6, 5);
+  add_pop(0);
+  add_inst(HLT);
+
+  // set distance to B*
+  link(dummy_inst.next, dummy_label.next);
+  // print code
+  print_inst(dummy_inst.next);
 
   return 0;
 }

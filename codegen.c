@@ -4,51 +4,53 @@ void gen_lval(Node *node) {
   if (node->kind != ND_LVAR)
     error("expecting variable.\n");
 
-  printf("MOV 0,5\n"); // mov r0,rbp
-  printf("SUBI 0,%d\n", node->offset); // set address to r0
-  printf("PUSH 0\n");
+  add_inst(MOV, 0, 5); // mov r0,rbp
+  add_inst(ADDI, 0, -(node->offset)); // set address to r0
+  add_push(0);
 }
 
 void gen(Node *node) {
   switch (node->kind) {
   case ND_NUM:
-    printf("LI 0,%d\n", node->val);
-    printf("PUSH 0\n");
+    add_inst(LI, 0, node->val);
+    add_push(0);
     return;
   case ND_LVAR:
     gen_lval(node);
-    printf("POP 0\n");
-    printf("LD 0,0,0\n");
-    printf("PUSH 0\n");
+    add_pop(0);
+    add_inst(LD, 0,0,0);
+    add_push(0);
     return;
   case ND_ASSIGN:
     gen_lval(node->lhs);
     gen(node->rhs);
-    printf("POP 1\n");
-    printf("POP 0\n");
-    printf("ST 1,0,0\n");
-    printf("PUSH 1\n");
+    add_pop(1);
+    add_pop(0);
+    add_inst(ST, 1,0,0);
+    add_push(1);
     return;
   case ND_RETURN:
     gen(node->lhs);
-    printf("POP 0\n");
-    printf("BR\n");
+    add_pop(0);
+    add_inst(BR);
     return;
   case ND_IF:       
     gen(node->lhs);           //条件評価 A
-    printf("POP 0\n");
-    printf("CMPI 0,1\n");
+    add_pop(0);
+    add_inst(CMPI, 0,1);
+    char *elselabel = get_unique_str("else");
+    char *ifendlabel = get_unique_str("ifend");
     if (node->rhs) {          // "if" "(" A ")" B "else" C 
-      printf("BE -> else\n");
+      add_jump(BE, elselabel);
       gen(node->stmt1);        // B
-      printf("B -> end\n");
-      printf("-> else\n");
+      add_jump(B, ifendlabel);
+      add_label(elselabel);
       gen(node->stmt2);       // C
-      printf("-> end\n");
+      add_label(ifendlabel);
     } else {                  // "if" "(" A ")" B
-      printf("BE -> end\n");
+      add_jump(BE, ifendlabel);
       gen(node->stmt1);       // B
-      printf("-> end\n");
+      add_label(ifendlabel);
     }
     return;
   default:
@@ -58,54 +60,54 @@ void gen(Node *node) {
   gen(node->lhs);
   gen(node->rhs);
 
-  printf("POP 1\n");
-  printf("POP 0\n");
+  add_pop(1);
+  add_pop(0);
 
   switch(node->kind) {
     case ND_ADD:
-      printf("ADD 0,1\n");
+      add_inst(ADD, 0,1);
       break;
     case ND_SUB:
-      printf("SUB 0,1\n");
+      add_inst(SUB, 0,1);
       break;
     case ND_MUL:
-      printf("MUL 0,1\n");
+      //add_call("MUL");
       break;
     case ND_DIV:
-      printf("DIV 0,1\n");
+      //add_call("DIV");
       break;
     case ND_EQL: // 条件が真なら0,偽なら1がスタックに
-      printf("CMP 0,1\n");
-      printf("BE 2\n");
-      printf("LI 0,1\n");
-      printf("B 1\n");
-      printf("LI 0,0\n");
+      add_inst(CMP, 0,1);
+      add_inst(BE, 2);
+      add_inst(LI, 0,1);
+      add_inst(B, 1);
+      add_inst(LI, 0,0);
       break;
     case ND_NEQL:
-      printf("CMP 0,1\n");
-      printf("BNE 2\n");
-      printf("LI 0,1\n");
-      printf("B 1\n");
-      printf("LI 0,0\n");
+      add_inst(CMP, 0,1);
+      add_inst(BNE, 2);
+      add_inst(LI, 0,1);
+      add_inst(B, 1);
+      add_inst(LI, 0,0);
       break;
     case ND_LT:
-      printf("CMP 0,1\n");
-      printf("BLT 2\n");
-      printf("LI 0,1\n");
-      printf("B 1\n");
-      printf("LI 0,0\n");
+      add_inst(CMP, 0,1);
+      add_inst(BLT, 2);
+      add_inst(LI, 0,1);
+      add_inst(B, 1);
+      add_inst(LI, 0,0);
       break;
     case ND_LTE:
-      printf("CMP 0,1\n");
-      printf("BLE 2\n");
-      printf("LI 0,1\n");
-      printf("B 1\n");
-      printf("LI 0,0\n");
+      add_inst(CMP, 0,1);
+      add_inst(BLE, 2);
+      add_inst(LI, 0,1);
+      add_inst(B, 1);
+      add_inst(LI, 0,0);
       break;
     default:
       ;
   }
 
-  printf("PUSH 0\n");
+  add_push(0);
 }
 
