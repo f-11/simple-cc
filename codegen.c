@@ -34,10 +34,10 @@ void gen(Node *node) {
     add_pop(0);
     add_inst(BR);
     return;
-  case ND_IF:       
+  case ND_IF: {       
     gen(node->lhs);           //条件評価 A
     add_pop(0);
-    add_inst(CMPI, 0,1);
+    add_inst(CMPI, 0,0);
     char *elselabel = get_unique_str("else");
     char *ifendlabel = get_unique_str("ifend");
     if (node->rhs) {          // "if" "(" A ")" B "else" C 
@@ -52,7 +52,34 @@ void gen(Node *node) {
       gen(node->stmt1);       // B
       add_label(ifendlabel);
     }
-    return;
+    return; }
+  case ND_WHILE: {             // while "(" A ")" B
+    char *whilelabel = get_unique_str("while");
+    char *whendlabel = get_unique_str("whend");
+    add_label(whilelabel);
+    gen(node->lhs);           //条件評価 A
+    add_pop(0);
+    add_inst(CMPI, 0,0);
+    add_jump(BE, whendlabel);
+    gen(node->stmt1);         // B
+    add_jump(B, whilelabel);
+    add_label(whendlabel);
+    return; }
+  case ND_FOR: {              // for "(" A? ";" B? ";" C? ")" D
+    char *forlabel = get_unique_str("for");
+    char *forendlabel = get_unique_str("forend");
+    if (node->lhs)
+      gen(node->lhs);           // A
+    add_label(forlabel);
+    gen(node->rhs);           // B
+    add_pop(0);
+    add_inst(CMPI, 0,0);
+    add_jump(BE, forendlabel);
+    gen(node->stmt2);         // D
+    gen(node->stmt1);         // C
+    add_jump(B, forlabel);
+    add_label(forendlabel);
+    return; }
   default:
     ;
   }
@@ -76,26 +103,26 @@ void gen(Node *node) {
     case ND_DIV:
       //add_call("DIV");
       break;
-    case ND_EQL: // 条件が真なら0,偽なら1がスタックに
+    case ND_EQL: // 条件が真なら1,偽なら0がスタックに
       add_inst(CMP, 0,1);
       add_inst(BE, 2);
-      add_inst(LI, 0,1);
-      add_inst(B, 1);
       add_inst(LI, 0,0);
+      add_inst(B, 1);
+      add_inst(LI, 0,1);
       break;
     case ND_NEQL:
       add_inst(CMP, 0,1);
       add_inst(BNE, 2);
-      add_inst(LI, 0,1);
-      add_inst(B, 1);
       add_inst(LI, 0,0);
+      add_inst(B, 1);
+      add_inst(LI, 0,1);
       break;
     case ND_LT:
       add_inst(CMP, 0,1);
       add_inst(BLT, 2);
-      add_inst(LI, 0,1);
-      add_inst(B, 1);
       add_inst(LI, 0,0);
+      add_inst(B, 1);
+      add_inst(LI, 0,1);
       break;
     case ND_LTE:
       add_inst(CMP, 0,1);

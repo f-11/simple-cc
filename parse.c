@@ -86,12 +86,38 @@ Node *stmt() {
   } else  if (consume_token(TK_IF)){ //if, if-else
     node = calloc(1, sizeof(Node));
     node->kind = ND_IF;
+    expect("(");
     node->lhs = expr();
+    expect(")");
     node->stmt1 = stmt();
     if (consume_ident(TK_ELSE)) {
       node->rhs = &dummy_node;
       node->stmt2 = stmt();
     }
+  } else if (consume_token(TK_WHILE)) {  // while
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_WHILE;
+    expect("(");
+    node->lhs = expr();
+    expect(")");
+    node->stmt1 = stmt();
+  } else if (consume_token(TK_FOR)) {  // for 
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_FOR;
+    expect("(");
+    if (!consume(";")) {
+      node->lhs = expr();
+      expect(";");
+    }
+    if (!consume(";")) {
+      node->rhs = expr();
+      expect(";");
+    }
+    if (!consume(")")) {
+      node->stmt1 = expr();
+      expect("(");
+    } 
+    node->stmt2 = stmt();
   } else {                          // expr;
     node = expr();
     expect(";");

@@ -47,6 +47,8 @@ typedef enum {
   ND_LVAR,   // local variables
   ND_RETURN,
   ND_IF,
+  ND_WHILE,
+  ND_FOR,
   ND_NUM,
 } NodeKind;
 
@@ -132,6 +134,7 @@ bool matchstr_plus(const char *p1, char *p2);
 bool isalnumu(char c);
 int get_unique_num();
 char *get_unique_str(const char *startwith);
+char *get_str(const char *string);
 
 //tokenize.c
 bool consume(const char *op);

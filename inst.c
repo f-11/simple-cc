@@ -89,9 +89,9 @@ void add_push(int n) {
 
 int search_label_and_return_line(char *name, Label *head) {
   for (Label *l = head; l; l = l->next)
-    if (!strcmp(name, l->name))
+    if (name == l->name || !strcmp(name, l->name))
       return l->inst->linenum;
-  error("No such label: %s\n", name);
+  error("No such label or function: %s\n", name);
   return 0;
 }
 

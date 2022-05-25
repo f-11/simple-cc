@@ -60,6 +60,13 @@ char *get_unique_str(const char *startwith) {
   return ptr;
 }
 
+char *get_str(const char *str) {
+  int len = strlen(str);
+  char *ptr = calloc(len + 1, sizeof(char));
+  strcpy(ptr, str);
+  return ptr;
+}
+
 //============
 
 int main (int argc, char **argv) {
@@ -73,6 +80,8 @@ int main (int argc, char **argv) {
   inst = &dummy_inst;
   label = &dummy_label;
 
+  char *mainlabel = get_str("main");
+
   user_input = argv[1];
   //tokenize
   token = tokenize();
@@ -84,17 +93,18 @@ int main (int argc, char **argv) {
   add_inst(SLL, 6, 12); // rsp = 4096
   add_push(5);
   add_inst(MOV, 5, 6);
+  add_call(mainlabel);
+  add_inst(MOV, 6, 5);
+  add_pop(0);
+  add_inst(HLT);
+  add_label(mainlabel);
 
   // generate code
   for (int i = 0; code[i] != NULL; i++) {
     gen(code[i]);
     add_pop(0);
   }
-
-  //final code
-  add_inst(MOV, 6, 5);
-  add_pop(0);
-  add_inst(HLT);
+  add_inst(BR);
 
   // set distance to B*
   link(dummy_inst.next, dummy_label.next);
