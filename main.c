@@ -90,8 +90,8 @@ int main (int argc, char **argv) {
 
   //initial code
   add_inst(LI, 6, 1);
-  add_inst(SLL, 6, 12); // rsp = 4096
-  add_push(5);
+  add_inst(SLL, 6, 12);   // rsp = 4096
+  add_push(6);
   add_inst(MOV, 5, 6);
   add_call(mainlabel);
   add_inst(MOV, 6, 5);

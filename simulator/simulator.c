@@ -22,6 +22,7 @@ struct Inst {
   int r0;     // Rd, Rs (OUT), Ra (LD,ST), Rb (LI), B* (d)
   int r1;     // Rs, d (shift*,LD,ST,ADDI,CMPI)
   int r2;     // Rb (LD,ST)
+  int line;
 };
 
 Inst inst[512];
@@ -91,10 +92,16 @@ void exec(Inst inst) {
   case HLT:
     break;
   case LD:
+    if (reg[r2] + r1 < 0 || 4095 < reg[r2] + r1) {
+      printf("error at line %d.\n", inst.line);
+      printf("LD: r[%d] = mem[%d+%d]\n", r0, reg[r2], r1); 
+      exit(1);
+    }
     reg[r0] = mem[reg[r2] + r1];
     break;
   case ST:
-    if (reg[r2] + r1 > 4095) {
+    if (reg[r2] + r1 < 0 || 4095 < reg[r2] + r1) {
+      printf("error at line %d.\n", inst.line);
       printf("ST: mem[%d+%d] = %d\n", reg[r2], r1, reg[r0]); 
       exit(1);
     }
@@ -265,6 +272,7 @@ int main(int argc, char **argv) {
   
   while(fgets(str, 15, fp) != NULL) {
     inst[i] = get_inst(str);
+    inst[i].line = i;
     i++;
   }
 
