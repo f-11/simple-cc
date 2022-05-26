@@ -23,7 +23,7 @@ void gen(Node *node) {
     gen_lvar(node);
     add_pop(0);
     add_inst(LD, 0,0,0);
-    add_inst(ADDI, 6, -1);
+    add_inst(MOV, 6, 0);
     add_push(0);
     return;
   case ND_ASSIGN:
@@ -32,7 +32,7 @@ void gen(Node *node) {
     add_pop(1);
     add_pop(0);
     add_inst(ST, 1,0,0);
-    add_inst(ADDI, 6, -1);
+    add_inst(MOV, 6, 0);
     add_push(1);
     return;
   case ND_RETURN:
@@ -85,6 +85,14 @@ void gen(Node *node) {
     gen(node->stmt1);         // C
     add_jump(B, forlabel);
     add_label(forendlabel);
+    return; }
+  case ND_BLOCK: {
+    Node *tmp = node->block;
+    while(tmp != NULL) {
+      gen(tmp);
+      add_pop(0);
+      tmp = tmp->block;
+    }
     return; }
   default:
     ;

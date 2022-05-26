@@ -33,6 +33,7 @@ int reg[8];
 int pc;
 int stack[100];
 char szcv[4];
+bool flag_debug = false;
 
 FILE *fp;
 int stack_adr = 0;
@@ -44,9 +45,22 @@ int stack_pop() {
   return stack[stack_adr];
 }
 
+void set_option(char *str) {
+  if (str[1] == 'd')
+    flag_debug = true;
+}
+
 void show_reg() {
   for (int i = 0; i < 8; i++)
     printf("    r[%d] = %d;\n", i, reg[i]);
+}
+
+void show_mem() {
+  int i;
+  for (i = 4095; i > 4089; i--)
+    printf("    *(%d) = %d\n", i, mem[i]);
+  for (i = 3; i >= 0; i--)
+    printf("    *(%d) = %d\n", i, mem[i]);
 }
 
 void exec(Inst inst) {
@@ -269,7 +283,11 @@ int main(int argc, char **argv) {
   char str[16];
 
   if (argc > 1) {
-    fp = fopen(argv[1], "r");
+    if (argv[1][0] == '-') {
+      set_option(argv[1]);
+      fp = stdin;
+    } else
+      fp = fopen(argv[1], "r");
   } else {
     fp = stdin;
   }
@@ -287,6 +305,9 @@ int main(int argc, char **argv) {
   while(pc < i)
     exec(inst[pc]);
 
-  show_reg();
+  if(flag_debug) {
+    show_reg();
+    show_mem();
+  }
   return reg[0];
 }

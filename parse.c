@@ -45,6 +45,7 @@ Node *new_node_ident(Token *tok) {
 
 // program = stmt*
 // stmt = expr ";" 
+//      | "{" stmt* "}"
 //      | "return" expr ";"
 //      | "if" "(" expr ")" stmt ("else" stmt)?
 //      | "while" "(" expr ")" stmt
@@ -83,7 +84,15 @@ Node *stmt() {
     node->kind = ND_RETURN;
     node->lhs = expr();
     expect(";");
-  } else  if (consume_token(TK_IF)){ //if, if-else
+  } else if (consume("{")) {        // {  }
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_BLOCK;
+    Node *tmp = node;
+    while (!consume("}")) {
+      tmp->block = stmt();
+      tmp = tmp->block;
+    }
+  } else if (consume_token(TK_IF)){ //if, if-else
     node = calloc(1, sizeof(Node));
     node->kind = ND_IF;
     expect("(");

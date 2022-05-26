@@ -49,6 +49,7 @@ typedef enum {
   ND_IF,
   ND_WHILE,
   ND_FOR,
+  ND_BLOCK,
   ND_NUM,
 } NodeKind;
 
@@ -58,6 +59,7 @@ struct Node {
   Node *rhs;  //右辺
   Node *stmt1;  // 制御構文用
   Node *stmt2;  //    (forのときはかなりad-hocな使い方をする) 
+  Node *block;    // ND_BLOCKのときに使われる
   int val;  //ND_NUMのとき
   int offset;   //ND_LVARのとき変数の位置を示す
 };
