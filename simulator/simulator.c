@@ -4,6 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#define MAX_PC 4096
+
 typedef struct Inst Inst;
 // instructions
 typedef enum {
@@ -40,6 +42,11 @@ void stack_push(int x) {
 int stack_pop() {
   stack_adr--;
   return stack[stack_adr];
+}
+
+void show_reg() {
+  for (int i = 0; i < 8; i++)
+    printf("    r[%d] = %d;\n", i, reg[i]);
 }
 
 void exec(Inst inst) {
@@ -90,6 +97,7 @@ void exec(Inst inst) {
     printf("OUT: %d\n", reg[r0]); 
     break;
   case HLT:
+    pc = MAX_PC;
     break;
   case LD:
     if (reg[r2] + r1 < 0 || 4095 < reg[r2] + r1) {
@@ -136,7 +144,7 @@ void exec(Inst inst) {
       pc += r0;
     break;
   case BNE:
-    if (!szcv[0])
+    if (!szcv[1])
       pc += r0;
     break;
   case BR:
@@ -278,5 +286,7 @@ int main(int argc, char **argv) {
 
   while(pc < i)
     exec(inst[pc]);
+
+  show_reg();
   return reg[0];
 }

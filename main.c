@@ -79,8 +79,9 @@ int main (int argc, char **argv) {
   Label dummy_label;
   inst = &dummy_inst;
   label = &dummy_label;
-
-  char *mainlabel = get_str("main");
+  //LVar dummy_var;
+  //dummy_var.offset = 0;
+  //locals = &dummy_var;
 
   user_input = argv[1];
   //tokenize
@@ -91,13 +92,13 @@ int main (int argc, char **argv) {
   //initial code
   add_inst(LI, 6, 1);
   add_inst(SLL, 6, 12);   // rsp = 4096
-  add_push(6);
-  add_inst(MOV, 5, 6);
-  add_call(mainlabel);
+  add_push(6);            // rsp = 4095, *(4095) = 4095
+  add_inst(MOV, 5, 6);    // rbp = rsp = 4095
+  add_call("main");
   add_inst(MOV, 6, 5);
-  add_pop(0);
+  add_pop(5);
   add_inst(HLT);
-  add_label(mainlabel);
+  add_label("main");
 
   // generate code
   for (int i = 0; code[i] != NULL; i++) {
@@ -107,7 +108,7 @@ int main (int argc, char **argv) {
   add_inst(BR);
 
   // set distance to B*
-  link(dummy_inst.next, dummy_label.next);
+  link(dummy_inst.next, label);
   // print code
   print_inst(dummy_inst.next);
 

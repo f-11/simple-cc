@@ -90,7 +90,7 @@ Node *stmt() {
     node->lhs = expr();
     expect(")");
     node->stmt1 = stmt();
-    if (consume_ident(TK_ELSE)) {
+    if (consume_token(TK_ELSE)) {
       node->rhs = &dummy_node;
       node->stmt2 = stmt();
     }

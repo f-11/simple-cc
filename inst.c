@@ -51,14 +51,6 @@ void add_inst(InstKind kind, ...){
   va_end(ap);
 }
 
-void add_call(char *name) {
-  Inst *new_inst = calloc(1, sizeof(Inst));
-  new_inst->kind = BAL;
-  new_inst->name = name;
-
-  inst->next = new_inst;
-  inst = new_inst;
-}
 void add_jump(InstKind kind, char *name) {
   Inst *new_inst = calloc(1, sizeof(Inst));
   new_inst->kind = kind;
@@ -67,13 +59,19 @@ void add_jump(InstKind kind, char *name) {
   inst->next = new_inst;
   inst = new_inst;
 }
+void add_call(const char *name) {
+  add_jump(BAL, get_str(name));
+}
 
-void add_label(char *name){
+void add_label(const char *name) {
+  add_label_u(get_str(name));
+}
+void add_label_u(char *name){
   Label *new_label = calloc(1, sizeof(Label));
   new_label->name = name;
   new_label->inst = inst; //ジャンプ先の一行前の命令
 
-  label->next = new_label;
+  new_label->next = label;
   label = new_label;
 }
 
@@ -88,8 +86,9 @@ void add_push(int n) {
 }
 
 int search_label_and_return_line(char *name, Label *head) {
+  int len = strlen(name);
   for (Label *l = head; l; l = l->next)
-    if (name == l->name || !strcmp(name, l->name))
+    if (name == l->name || (len == strlen(l->name) && !strcmp(name, l->name)))
       return l->inst->linenum;
   error("No such label or function: %s\n", name);
   return 0;

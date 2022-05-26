@@ -107,11 +107,13 @@ struct Inst {
   int r2;     // Rb (LD,ST)
   int linenum; // アセンブリにおける行番号
   char *name; // ジャンプ系の命令でラベルの名前
+  int len;
   Inst *next;
 };
 
 struct Label {
   char *name;
+  int len;
   Inst *inst; // アセンブリでジャンプ先の一行前の命令
   Label *next;
 };
@@ -157,9 +159,10 @@ void gen(Node *node);
 
 //inst.c
 void add_inst(InstKind kind, ...);
-void add_call(char *name);
+void add_call(const char *name);
 void add_jump(InstKind kind, char *name);
-void add_label(char *name);
+void add_label(const char *name);
+void add_label_u(char *name);
 void add_pop(int n);
 void add_push(int n);
 void link(Inst *head, Label *lhead);

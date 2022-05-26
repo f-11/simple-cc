@@ -1,6 +1,10 @@
 #include "simple-cc.h"
 
-void gen_lval(Node *node) {
+// r[5] = rbp
+// r[6] = rsp
+// r[7] = zero
+
+void gen_lvar(Node *node) {
   if (node->kind != ND_LVAR)
     error("expecting variable.\n");
 
@@ -16,17 +20,19 @@ void gen(Node *node) {
     add_push(0);
     return;
   case ND_LVAR:
-    gen_lval(node);
+    gen_lvar(node);
     add_pop(0);
     add_inst(LD, 0,0,0);
+    add_inst(ADDI, 6, -1);
     add_push(0);
     return;
   case ND_ASSIGN:
-    gen_lval(node->lhs);
+    gen_lvar(node->lhs);
     gen(node->rhs);
     add_pop(1);
     add_pop(0);
     add_inst(ST, 1,0,0);
+    add_inst(ADDI, 6, -1);
     add_push(1);
     return;
   case ND_RETURN:
@@ -98,7 +104,11 @@ void gen(Node *node) {
       add_inst(SUB, 0,1);
       break;
     case ND_MUL:
-      //add_call("MUL");
+      add_inst(MOV, 2, 0);
+      add_inst(ADD, 0, 2);
+      add_inst(ADDI, 1, -1);
+      add_inst(CMPI, 1, 1);
+      add_inst(BNE, -4);
       break;
     case ND_DIV:
       //add_call("DIV");
