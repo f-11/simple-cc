@@ -48,10 +48,10 @@ void gen(Node *node) {
     char *ifendlabel = get_unique_str("ifend");
     if (node->rhs) {          // "if" "(" A ")" B "else" C 
       add_jump(BE, elselabel);
-      gen(node->stmt1);        // B
+      gen(node->stmt2);        // C
       add_jump(B, ifendlabel);
       add_label(elselabel);
-      gen(node->stmt2);       // C
+      gen(node->stmt1);       // B
       add_label(ifendlabel);
     } else {                  // "if" "(" A ")" B
       add_jump(BE, ifendlabel);

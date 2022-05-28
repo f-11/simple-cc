@@ -34,6 +34,7 @@ int pc;
 int stack[100];
 char szcv[4];
 bool flag_debug = false;
+int board[8];
 
 FILE *fp;
 int stack_adr = 0;
@@ -48,6 +49,22 @@ int stack_pop() {
 void set_option(char *str) {
   if (str[1] == 'd')
     flag_debug = true;
+}
+
+void update_board(int val, int d) {
+  board[d] = val;
+}
+
+void show_board() {
+  for (int i=0; i<8; i++) {
+    int bd = board[i];
+    for (int d = 0; d < 16; d++)
+      if (((bd >> (15-d)) & 1) == 1)
+        printf("@");
+      else
+        printf(".");
+    printf("\n");
+  }
 }
 
 void show_reg() {
@@ -109,6 +126,8 @@ void exec(Inst inst) {
     break;
   case OUT:
     printf("OUT: %d\n", reg[r0]); 
+    update_board(reg[r0], r1);
+    show_board();
     break;
   case HLT:
     pc = MAX_PC;
@@ -248,7 +267,7 @@ Inst get_inst(char* str) {
     hikisuu2(str+5, &inst);
   } else if (matchstr_plus("OUT", str)) {
     inst.kind = OUT;
-    hikisuu1(str+4, &inst);
+    hikisuu2(str+4, &inst);
   } else if (matchstr_plus("B", str)) {
     inst.kind = B;
     hikisuu1(str+2, &inst);

@@ -79,9 +79,10 @@ int main (int argc, char **argv) {
   Label dummy_label;
   inst = &dummy_inst;
   label = &dummy_label;
-  //LVar dummy_var;
-  //dummy_var.offset = 0;
-  //locals = &dummy_var;
+  LVar dummy_var;
+  dummy_var.name = 0;
+  dummy_var.offset = 0;
+  locals = &dummy_var;
 
   user_input = argv[1];
   //tokenize
@@ -92,7 +93,7 @@ int main (int argc, char **argv) {
   //initial code
   add_inst(LI, 6, 1);
   add_inst(SLL, 6, 12);   // rsp = 4096
-  add_push(6);            // rsp = 4095, *(4095) = 4095
+  add_push(7);            // rsp = 4095, *(4095) = 0 
   add_inst(MOV, 5, 6);    // rbp = rsp = 4095
   add_call("main");
   add_inst(MOV, 6, 5);
