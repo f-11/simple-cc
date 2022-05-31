@@ -22,7 +22,6 @@ for line in fasm:
         else:
             linenum = linenum + 1
 
-print(local)
 fasm.seek(0)
 linenum = 0
 for line in fasm:
@@ -34,7 +33,12 @@ for line in fasm:
         s = line.split()
         if line[0] != '.':
             if len(s) > 1 and s[1][0:1] == '.':
-                print(s[0] + " " + str(local[s[1]] - linenum - 1))
+                diff = local[s[1]] - linenum - 1
+                if diff > 125 or diff < -125:
+                    print('ERROR: at line: ' + str(linenum))
+                    print('ERROR: too far between function and call')
+                    sys.exit(2)
+                print(s[0] + " " + str(diff))
             else:
                 print(line)
             linenum = linenum + 1
